@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GymFlow Check-in</title>
+  <style>
+    :root {
+      --primary: #0066cc;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --error: #ef4444;
+      --success: #22c55e;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .header {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .container {
+      flex: 1;
+      width: 100%;
+      max-width: 400px;
+      padding: 24px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #475569;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #status-area {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .error-msg {
+      background-color: #fef2f2;
+      color: var(--error);
+      border: 1px solid #fecaca;
+    }
+
+    /* Success View */
+    #success-view {
+      display: none;
+      text-align: center;
+      padding-top: 10px;
+    }
+
+    .success-icon {
+      color: var(--success);
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .success-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--success);
+      margin-bottom: 24px;
+    }
+
+    .member-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--success);
+      margin: 0 auto 16px;
+      background-color: #e2e8f0;
+    }
+
+    .member-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .expiry {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+
+    .trainer-instruction {
+      font-size: 13px;
+      color: #475569;
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>GymFlow</h1>
+  </div>
+
+  <div class="container">
+    <div class="card" id="form-card">
+      <h2 style="margin-top: 0; font-size: 20px; margin-bottom: 8px; text-align: center;">Self Check-in</h2>
+      <p style="color: #64748b; font-size: 14px; margin-bottom: 24px; text-align: center;">Scan and mark your attendance
+      </p>
+
+      <form id="checkin-form">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="Enter 10-digit number" maxlength="10" inputmode="numeric" required>
+        </div>
+        <div class="form-group">
+          <label for="pin">4-Digit PIN</label>
+          <input type="password" id="pin" placeholder="••••" maxlength="4" inputmode="numeric" required>
+        </div>
+        <button type="submit" id="submit-btn">Check In</button>
+      </form>
+
+      <div id="status-area"></div>
+    </div>
+
+    <div class="card" id="success-view">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Check-in Successful!</div>
+
+      <img id="s-photo" class="member-photo" src="" alt="Member Photo">
+      <div class="member-name" id="s-name"></div>
+      <div class="expiry">Valid until: <span id="s-expiry" style="font-weight: 600; color: var(--text);"></span></div>
+
+      <div class="trainer-instruction">
+        Please show this screen to the trainer at the desk.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('checkin-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const phoneInput = document.getElementById('phone');
+      const pinInput = document.getElementById('pin');
+      const btn = document.getElementById('submit-btn');
+      const statusArea = document.getElementById('status-area');
+
+      // Frontend Validation
+      const phone = phoneInput.value.trim();
+      const pin = pinInput.value.trim();
+
+      if (!/^\d{10}$/.test(phone)) {
+        showStatus('Please enter a valid 10-digit phone number.', 'error');
+        phoneInput.focus();
+        return;
+      }
+
+      if (!/^\d{4}$/.test(pin)) {
+        showStatus('Please enter a valid 4-digit PIN.', 'error');
+        pinInput.focus();
+        return;
+      }
+
+      // Submit Request
+      statusArea.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        const response = await fetch('/api/checkin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ phone, pin })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          // Success Path
+          document.getElementById('form-card').style.display = 'none';
+          document.getElementById('success-view').style.display = 'block';
+
+          document.getElementById('s-name').textContent = data.data.name;
+          const expiryDate = new Date(data.data.expiryDate).toLocaleDateString(undefined, {
+            year: 'numeric', month: 'short', day: 'numeric'
+          });
+          document.getElementById('s-expiry').textContent = expiryDate;
+
+          if (data.data.photoUrl) {
+            document.getElementById('s-photo').src = data.data.photoUrl;
+          } else {
+            // Default avatar
+            document.getElementById('s-photo').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cbd5e1"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+          }
+        } else {
+          showStatus(data.message || 'Check-in failed. Please try again.', 'error');
+        }
+      } catch (err) {
+        showStatus('Network error. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Check In';
+      }
+    });
+
+    function showStatus(message, type) {
+      const statusArea = document.getElementById('status-area');
+      statusArea.textContent = message;
+      statusArea.className = type === 'error' ? 'error-msg' : '';
+      statusArea.style.display = 'block';
+    }
+  </script>
+</body>
+
+</html>

@@ -39,9 +39,9 @@ app.use('/api/members', memberRoutes);
 app.use('/api/checkin', checkinRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Catch-all to serve checkin.html for /checkin
+// Catch-all to serve the QR check-in page
 app.get('/checkin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'checkin.html'));
+  res.sendFile(path.join(__dirname, 'public', 'checkin', 'index.html'));
 });
 
 // Centralized Error Handling Middleware
