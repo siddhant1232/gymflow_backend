@@ -116,9 +116,58 @@ const resetPin = async (req, res) => {
   }
 };
 
+// @desc    Renew a member's subscription
+// @route   POST /api/members/:id/renew
+// @access  Public
+const renewMembership = async (req, res, next) => {
+  try {
+    const memberId = req.params.id;
+    const { durationMonths } = req.body;
+
+    if (!durationMonths) {
+      return res.status(400).json({ success: false, message: 'durationMonths is required' });
+    }
+
+    const member = await Member.findById(memberId);
+
+    if (!member) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let newExpiryDate = new Date(member.expiryDate);
+
+    // If member is expired or expiryDate passed, renew from today
+    if (member.status === 'expired' || member.expiryDate < today) {
+      newExpiryDate = new Date();
+      newExpiryDate.setHours(0, 0, 0, 0);
+    }
+
+    // Add duration
+    newExpiryDate.setMonth(newExpiryDate.getMonth() + parseInt(durationMonths));
+
+    member.expiryDate = newExpiryDate;
+    member.status = 'active';
+    member.reminderSent = false;
+
+    await member.save();
+
+    res.json({
+      success: true,
+      message: 'Membership renewed successfully',
+      data: member
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerMember,
   getMembers,
   getExpiringMembers,
   resetPin,
+  renewMembership,
 };

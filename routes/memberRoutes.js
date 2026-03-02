@@ -41,4 +41,9 @@ router.post(
   memberController.resetPin
 );
 
+router.post('/:id/renew', memberController.renewMembership);
+
+const checkinController = require('../controllers/checkinController');
+router.get('/:id/attendance', checkinController.getMemberAttendance);
+
 module.exports = router;

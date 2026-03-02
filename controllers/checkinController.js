@@ -49,6 +49,10 @@ const processCheckin = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Membership expired' });
     }
 
+    if (member.status !== 'active') {
+      return res.status(403).json({ success: false, message: 'Membership is not active' });
+    }
+
     // 4. Ensure one check-in per day
     const formattedDate = getFormattedDate();
     const existingAttendance = await Attendance.findOne({
@@ -68,6 +72,9 @@ const processCheckin = async (req, res) => {
       method: 'QR',
     });
 
+    // Calculate rough plan duration in months
+    const durationMonths = Math.max(1, Math.round((member.expiryDate - member.startDate) / (1000 * 60 * 60 * 24 * 30)));
+
     // 6. Return success response
     res.json({
       success: true,
@@ -75,6 +82,8 @@ const processCheckin = async (req, res) => {
         name: member.name,
         photoUrl: member.photoUrl,
         expiryDate: member.expiryDate,
+        planDuration: `${durationMonths} Month(s)`,
+        status: member.status
       },
     });
 
@@ -98,12 +107,20 @@ const getTodayAttendance = async (req, res) => {
 };
 
 // @desc    Get specific member's attendance
-// @route   GET /api/checkin/:memberId
+// @route   GET /api/checkin/:memberId OR /api/members/:id/attendance
 // @access  Public
 const getMemberAttendance = async (req, res) => {
   try {
-    const attendance = await Attendance.find({ memberId: req.params.memberId }).sort({ createdAt: -1 });
-    res.json(attendance);
+    const memberId = req.params.memberId || req.params.id;
+    const attendance = await Attendance.find({ memberId }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: {
+        totalVisitsCount: attendance.length,
+        history: attendance
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
